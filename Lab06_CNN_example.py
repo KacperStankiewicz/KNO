@@ -66,11 +66,11 @@ def define_model():
     return model
 
 
-trainX, trainY, testX, testY = load_data()
+trainX, trainY, testX, testY = load_data(True)
 trainX, testX = normalize_pixels(trainX, testX)
 model = define_model()
 
-model.fit(trainX, trainY, epochs=50, batch_size=128, validation_data=(testX, testY), callbacks=tensorboard_callback)
+model.fit(trainX, trainY, epochs=50, batch_size=128, validation_split=0.1, callbacks=tensorboard_callback)
 
 _, acc = model.evaluate(testX, testY, verbose=0)
 print('> %.3f' % (acc * 100.0))
