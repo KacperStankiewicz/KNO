@@ -1,14 +1,12 @@
 import datetime
-import fileinput
 
 import tensorflow as tf
-from matplotlib import pyplot
 from keras.datasets import cifar10
-from keras.utils import to_categorical
-from keras.models import Sequential
 from keras.layers import Dropout, Conv2D, MaxPooling2D, Dense, Flatten
+from keras.models import Sequential
 from keras.optimizers import SGD
-
+from keras.utils import to_categorical
+from matplotlib import pyplot
 
 logdir = "./logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
@@ -16,6 +14,11 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
 
 def load_data(verbose=False):
     (trainX, trainY), (testX, testY) = cifar10.load_data()
+
+    trainX = trainX[:10001]
+    testX = testX[:10001]
+    trainY = trainY[:10001]
+    testY = testY[:10001]
 
     if verbose:
         print('Train: X=%s, y=%s' % (trainX.shape, trainY.shape))
@@ -44,11 +47,11 @@ def normalize_pixels(train, test):
 def define_model():
     model = Sequential()
     model.add(
-        Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same', input_shape=(32, 32, 3)))
-    model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
+        Conv2D(32, (3, 3), input_shape=(32, 32, 3), activation='relu', kernel_initializer='he_uniform', padding='valid'))
+    model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='valid'))
     model.add(MaxPooling2D((2, 2)))
     model.add(Dropout(0.2))
-    model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
+    model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='valid'))
     model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
     model.add(MaxPooling2D((2, 2)))
     model.add(Dropout(0.2))
@@ -70,7 +73,7 @@ trainX, trainY, testX, testY = load_data(True)
 trainX, testX = normalize_pixels(trainX, testX)
 model = define_model()
 
-model.fit(trainX, trainY, epochs=50, batch_size=128, validation_split=0.1, callbacks=tensorboard_callback)
+model.fit(trainX, trainY, epochs=10, batch_size=128, validation_split=0.1, callbacks=tensorboard_callback)
 
 _, acc = model.evaluate(testX, testY, verbose=0)
 print('> %.3f' % (acc * 100.0))
